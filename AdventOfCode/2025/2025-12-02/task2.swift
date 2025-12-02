@@ -1,0 +1,44 @@
+import Foundation
+
+func main() {
+    // Get the path relative to the current file location
+    let fileURL = URL(fileURLWithPath: FileManager.default.currentDirectoryPath)
+        .appendingPathComponent("data1.txt")
+
+    do {
+        let content = try String(contentsOf: fileURL, encoding: .utf8)
+        let lines: [String] = content.components(separatedBy: ",")
+        let result = getInvalidIdSum(idRanges: lines)
+        print("The sum of all invalid IDs is: \(result)")
+    } catch {
+        print("Error reading file: \(error)")
+    }
+}
+
+func getInvalidIdSum(idRanges: [String]) -> Int {
+    var invalidIdSum = 0
+
+    for range in idRanges {
+        let barriers = range.components(separatedBy: "-").compactMap { Int($0) }
+        if barriers.count != 2 {
+            print(range)
+            continue
+        }
+
+        for i in barriers[0]...barriers[1] {
+            let iString = String(i)
+
+            let pattern = try! Regex("^([0-9]+)\\1+$")
+            let isRepeatingPattern = iString.firstMatch(of: pattern) != nil
+
+            if isRepeatingPattern {
+                print(i)
+                invalidIdSum += i
+            }
+        }
+    }
+
+    return invalidIdSum
+}
+
+main()
